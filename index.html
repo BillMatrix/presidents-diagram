@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>US Presidents Since Herbert Hoover</title>
+    <style>
+        :root {
+            --primary-color: #003366;
+            --secondary-color: #f8f8f8;
+            --accent-color: #d4af37;
+            --text-color: #333;
+            --shadow: 0 4px 8px rgba(0,0,0,0.1);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+            padding: 2rem 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 2;
+        }
+        
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .search-box {
+            padding: 0.5rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            width: 250px;
+            transition: var(--transition);
+        }
+        
+        .search-box:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 5px rgba(212, 175, 55, 0.5);
+        }
+        
+        .filter-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .btn:hover {
+            background-color: #00254d;
+            transform: translateY(-2px);
+        }
+        
+        .btn.active {
+            background-color: var(--accent-color);
+        }
+        
+        .presidents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+        
+        .president-card {
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .president-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 16px rgba(0,0,0,0.2);
+        }
+        
+        .president-image {
+            height: 300px;
+            width: 100%;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+        
+        .president-card:hover .president-image {
+            filter: brightness(1.1);
+        }
+        
+        .president-info {
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .president-name {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+        
+        .president-years {
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .president-party {
+            margin-top: 0.5rem;
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .democrat {
+            background-color: rgba(0, 83, 255, 0.1);
+            color: #0053ff;
+        }
+        
+        .republican {
+            background-color: rgba(255, 0, 0, 0.1);
+            color: #ff0000;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            z-index: 10;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: 8px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #333;
+            z-index: 2;
+        }
+        
+        .modal-body {
+            display: flex;
+            flex-direction: column;
+            padding: 2rem;
+        }
+        
+        @media (min-width: 768px) {
+            .modal-body {
+                flex-direction: row;
+                gap: 2rem;
+            }
+        }
+        
+        .modal-image {
+            flex: 1;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+        
+        .modal-image img {
+            width: 100%;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+        }
+        
+        .modal-details {
+            flex: 2;
+        }
+        
+        .modal-name {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .modal-years {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stats-container {
+            margin-top: 4rem;
+            padding: 2rem;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+        }
+        
+        .stats-title {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--primary-color);
+        }
+        
+        .chart-container {
+            height: 300px;
+            position: relative;
+            margin-bottom: 2rem;
+        }
+        
+        .chart-bar {
+            position: absolute;
+            bottom: 0;
+            width: 40px;
+            background-color: var(--primary-color);
+            border-radius: 4px 4px 0 0;
+            transition: height 1s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+        }
+        
+        .chart-label {
+            transform: rotate(-45deg);
+            font-size: 0.8rem;
+            white-space: nowrap;
+            position: absolute;
+            bottom: -30px;
+            left: 20px;
+            transform-origin: left top;
+        }
+        
+        .chart-value {
+            color: white;
+            font-weight: bold;
+            padding: 5px 0;
+        }
+        
+        footer {
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+        
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8rem;
+            }
+            
+            header p {
+                font-size: 1rem;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-box {
+                width: 100%;
+            }
+            
+            .filter-buttons {
+                justify-content: center;
+            }
+            
+            .presidents-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 1rem;
+            }
+            
+            .president-image {
+                height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>US Presidents Since Herbert Hoover</h1>
+        <p>Explore the leaders who shaped modern America</p>
+    </header>
+    
+    <div class="container">
+        <div class="controls">
+            <input type="text" class="search-box" placeholder="Search presidents..." id="searchInput">
+            <div class="filter-buttons">
+                <button class="btn active" data-filter="all">All</button>
+                <button class="btn" data-filter="democrat">Democrats</button>
+                <button class="btn" data-filter="republican">Republicans</button>
+                <button class="btn" id="sortBtn">Sort by Years</button>
+            </div>
+        </div>
+        
+        <div class="presidents-grid" id="presidentsGrid"></div>
+        
+        <div class="stats-container">
+            <h2 class="stats-title">Presidential Terms Length</h2>
+            <div class="chart-container" id="termsChart"></div>
+        </div>
+    </div>
+    
+    <div class="modal" id="presidentModal">
+        <div class="modal-content">
+            <button class="close-modal" id="closeModal">&times;</button>
+            <div class="modal-body" id="modalBody">
+                <!-- Content will be dynamically inserted here -->
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>&copy; 2024 US Presidents Gallery | Created for educational purposes</p>
+    </footer>
+
+    <script>
+        // Presidents data
+        const presidents = [
+            {
+                name: "Franklin D. Roosevelt",
+                years: "1933–1945",
+                image: "https://firstamendment.mtsu.edu/wp-content/uploads/sites/2/2023/11/Franklin-D-Roosevelt.jpg",
+                party: "Democrat",
+                termLength: 12,
+                bio: "Franklin D. Roosevelt was the 32nd president of the United States and the only president elected to the office four times. He led the United States through the Great Depression and World War II."
+            },
+            {
+                name: "Harry S. Truman",
+                years: "1945–1953",
+                image: "https://kclibrary.org/sites/default/files/styles/art_object_large/public/Portrait%20of%20Harry%20S.%20Truman_17424.jpg?itok=XTxXjd-Y",
+                party: "Democrat",
+                termLength: 8,
+                bio: "Harry S. Truman was the 33rd president of the United States, succeeding upon the death of Franklin D. Roosevelt. He implemented the Marshall Plan to rebuild Europe after World War II and made the decision to use atomic weapons against Japan."
+            },
+            {
+                name: "Dwight D. Eisenhower",
+                years: "1953–1961",
+                image: "https://images.axios.com/-QYyst1Jw3Vw9UpCE4flDEs57dM=/0x169:3000x1856/1920x1080/2024/10/16/1729101314258.jpg?w=3840",
+                party: "Republican",
+                termLength: 8,
+                bio: "Dwight D. Eisenhower was the 34th president of the United States. A five-star general in the Army, he served as Supreme Commander of the Allied Forces in Europe during World War II and was responsible for planning the invasion of Normandy."
+            },
+            {
+                name: "John F. Kennedy",
+                years: "1961–1963",
+                image: "https://res.cloudinary.com/aenetworks/image/upload/c_fill,ar_2,w_3840,h_1920,g_auto/dpr_auto/f_auto/q_auto:eco/v1/gettyimages-872442016?_a=BAVAZGDX0",
+                party: "Democrat",
+                termLength: 2,
+                bio: "John F. Kennedy was the 35th president of the United States. At age 43, he was the youngest man elected president and the first Roman Catholic. Kennedy was assassinated in Dallas on November 22, 1963."
+            },
+            {
+                name: "Lyndon B. Johnson",
+                years: "1963–1969",
+                image: "https://upload.wikimedia.org/wikipedia/commons/c/c4/Lyndon_B._Johnson%2C_photo_portrait%2C_color_%283x4_cropped%29.jpg",
+                party: "Democrat",
+                termLength: 6,
+                bio: "Lyndon B. Johnson was the 36th president of the United States. He assumed the presidency following the assassination of President Kennedy. Johnson designed the 'Great Society' legislation, including civil rights, Medicare, Medicaid, and public broadcasting."
+            },
+            {
+                name: "Richard Nixon",
+                years: "1969–1974",
+                image: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Richard_Nixon_presidential_portrait_%281%29.jpg/1200px-Richard_Nixon_presidential_portrait_%281%29.jpg",
+                party: "Republican",
+                termLength: 5,
+                bio: "Richard Nixon was the 37th president of the United States. He is the only president to resign from office, following the Watergate scandal. His achievements include ending American involvement in the Vietnam War and opening relations with China."
+            },
+            {
+                name: "Gerald Ford",
+                years: "1974–1977",
+                image: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Gerald_Ford_presidential_portrait_%28cropped%29.jpg/1200px-Gerald_Ford_presidential_portrait_%28cropped%29.jpg",
+                party: "Republican",
+                termLength: 3,
+                bio: "Gerald Ford was the 38th president of the United States. He is the only person to have served as both vice president and president without being elected to either office. Ford is known for pardoning Nixon following his resignation."
+            },
+            {
+                name: "Jimmy Carter",
+                years: "1977–1981",
+                image: "https://www.aljazeera.com/wp-content/uploads/2024/09/2023-11-29T210147Z_663274362_RC25N4AJALRO_RTRMADP_3_PEOPLE-ROSALYNN-CARTER-1727728688.jpg?resize=1800%2C1800",
+                party: "Democrat",
+                termLength: 4,
+                bio: "Jimmy Carter was the 39th president of the United States. His administration is known for the Camp David Accords, the Panama Canal Treaties, and the establishment of diplomatic relations with China. After his presidency, he became a noted humanitarian."
+            },
+            {
+                name: "Ronald Reagan",
+                years: "1981–1989",
+                image: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/Official_Portrait_of_President_Reagan_1981.jpg/960px-Official_Portrait_of_President_Reagan_1981.jpg",
+                party: "Republican",
+                termLength: 8,
+                bio: "Ronald Reagan was the 40th president of the United States. His economic policies, dubbed 'Reaganomics,' advocated tax reduction and deregulation. Reagan's foreign policy was marked by the end of the Cold War and the fall of the Soviet Union."
+            },
+            {
+                name: "Donald Trump",
+                years: "2017–2021",
+                image: "https://www.whitehouse.gov/wp-content/uploads/2025/06/President-Donald-Trump-Official-Presidential-Portrait.png",
+                party: "Republican",
+                termLength: 4,
+                bio: "Donald Trump was the 45th president of the United States. His presidency was marked by tax cuts, deregulation, trade disputes, immigration restrictions, and the COVID-19 pandemic. He was the first president to be impeached twice."
+            }
+        ];
+
+        // DOM elements
+        const presidentsGrid = document.getElementById('presidentsGrid');
+        const searchInput = document.getElementById('searchInput');
+        const filterButtons = document.querySelectorAll('.filter-buttons .btn');
+        const sortBtn = document.getElementById('sortBtn');
+        const modal = document.getElementById('presidentModal');
+        const closeModal = document.getElementById('closeModal');
+        const modalBody = document.getElementById('modalBody');
+        const termsChart = document.getElementById('termsChart');
+
+        // Current filter and sort state
+        let currentFilter = 'all';
+        let isAscending = true;
+
+        // Render presidents grid
+        function renderPresidents() {
+            presidentsGrid.innerHTML = '';
+            
+            let filteredPresidents = presidents.filter(president => {
+                if (currentFilter === 'all') return true;
+                return president.party.toLowerCase() === currentFilter;
+            });
+            
+            // Apply search filter
+            const searchTerm = searchInput.value.toLowerCase();
+            if (searchTerm) {
+                filteredPresidents = filteredPresidents.filter(president => 
+                    president.name.toLowerCase().includes(searchTerm) || 
+                    president.years.includes(searchTerm)
+                );
+            }
+            
+            // Sort if needed
+            filteredPresidents.sort((a, b) => {
+                const yearA = parseInt(a.years.split('–')[0]);
+                const yearB = parseInt(b.years.split('–')[0]);
+                return isAscending ? yearA - yearB : yearB - yearA;
+            });
+            
+            filteredPresidents.forEach(president => {
+                const card = document.createElement('div');
+                card.className = 'president-card';
+                card.innerHTML = `
+                    <img src="${president.image}" alt="${president.name}" class="president-image">
+                    <div class="president-info">
+                        <h3 class="president-name">${president.name}</h3>
+                        <p class="president-years">${president.years}</p>
+                        <span class="president-party ${president.party.toLowerCase()}">${president.party}</span>
+                    </div>
+                `;
+                
+                card.addEventListener('click', () => showModal(president));
+                presidentsGrid.appendChild(card);
+            });
+        }
+
+        // Show president modal
+        function showModal(president) {
+            modalBody.innerHTML = `
+                <div class="modal-image">
+                    <img src="${president.image}" alt="${president.name}">
+                </div>
+                <div class="modal-details">
+                    <h2 class="modal-name">${president.name}</h2>
+                    <p class="modal-years">${president.years}</p>
+                    <span class="president-party ${president.party.toLowerCase()}">${president.party}</span>
+                    <p style="margin-top: 1.5rem">${president.bio}</p>
+                </div>
+            `;
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Close modal
+        function closeModalFunc() {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Render chart
+        function renderChart() {
+            termsChart.innerHTML = '';
+            const chartWidth = termsChart.offsetWidth;
+            const maxTermLength = Math.max(...presidents.map(p => p.termLength));
+            const barWidth = Math.min(40, (chartWidth / presidents.length) - 10);
+            
+            presidents.forEach((president, index) => {
+                const barHeight = (president.termLength / maxTermLength) * 250;
+                const bar = document.createElement('div');
+                bar.className = 'chart-bar';
+                bar.style.height = '0';
+                bar.style.left = `${index * (barWidth + 10) + 20}px`;
+                bar.style.width = `${barWidth}px`;
+                bar.style.backgroundColor = president.party === 'Democrat' ? '#0053ff' : '#ff0000';
+                
+                const label = document.createElement('div');
+                label.className = 'chart-label';
+                label.textContent = president.name.split(' ').pop();
+                
+                const value = document.createElement('div');
+                value.className = 'chart-value';
+                value.textContent = `${president.termLength} yrs`;
+                
+                bar.appendChild(value);
+                termsChart.appendChild(bar);
+                termsChart.appendChild(label);
+                
+                // Animate chart bars
+                setTimeout(() => {
+                    bar.style.height = `${barHeight}px`;
+                }, 100 * index);
+            });
+        }
+
+        // Event listeners
+        searchInput.addEventListener('input', renderPresidents);
+        
+        filterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                currentFilter = button.dataset.filter;
+                renderPresidents();
+            });
+        });
+        
+        sortBtn.addEventListener('click', () => {
+            isAscending = !isAscending;
+            sortBtn.textContent = isAscending ? 'Sort by Years' : 'Sort by Years (Desc)';
+            renderPresidents();
+        });
+        
+        closeModal.addEventListener('click', closeModalFunc);
+        
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModalFunc();
+            }
+        });
+        
+        window.addEventListener('resize', renderChart);
+
+        // Initialize
+        renderPresidents();
+        renderChart();
+    </script>
+</body>
+</html>
